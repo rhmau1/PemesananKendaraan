@@ -47,13 +47,7 @@ namespace PemesananKendaraan.Controllers
         [HttpGet("vehicle-usage")]
         public async Task<IActionResult> GetVehicleUsage([FromQuery] DateTime start_date, [FromQuery] DateTime end_date)
         {
-            // Validasi tanggal
-            if (start_date > end_date)
-            {
-                return BadRequest("Start date cannot be later than end date");
-            }
-
-            // Ambil data booking yang sesuai dengan rentang waktu dan minimal memiliki 2 approval yang disetujui
+            
             var vehicleUsage = await _context.Booking
                 .Where(b => b.start_booking >= start_date && b.end_booking <= end_date)
                 .Select(b => new
