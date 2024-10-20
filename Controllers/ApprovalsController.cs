@@ -96,7 +96,7 @@ namespace PemesananKendaraan.Controllers
 
             var approvalsForBooking = await _context.Approval.Where(a => a.booking_id == approval.booking_id && a.is_approved == true).ToListAsync();
 
-            // Cek apakah sudah ada minimal 2 approval level yang disetujui
+            
             if (approvalsForBooking.Count >= 2)
             {
                 var booking = await _context.Booking.FindAsync(approval.booking_id);
@@ -105,7 +105,7 @@ namespace PemesananKendaraan.Controllers
                     return NotFound("Booking not found");
                 }
 
-                // Update driver availability
+                
                 var driver = await _context.Driver.FindAsync(booking.driver_id);
                 if (driver != null)
                 {
@@ -113,7 +113,7 @@ namespace PemesananKendaraan.Controllers
                     _context.Entry(driver).State = EntityState.Modified;
                 }
 
-                // Update vehicle availability
+                
                 var vehicle = await _context.Vehicle.FindAsync(booking.vehicle_id);
                 if (vehicle != null)
                 {
