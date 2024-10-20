@@ -7,6 +7,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PemesananKendaraan.Models;
 using monitorKendaraan.Models;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authorization;
 
 namespace PemesananKendaraan.Controllers
 {
@@ -72,46 +74,25 @@ namespace PemesananKendaraan.Controllers
                 .ToListAsync();
 
             return Ok(vehicleUsage);
-        }
-
-        // PUT: api/Vehicles/5
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPut("{id}")]
-        [Consumes("application/x-www-form-urlencoded")]
-        public async Task<IActionResult> PutVehicle(int id, Vehicle vehicle)
-        {
-            if (id != vehicle.vehicle_id)
-            {
-                return BadRequest();
-            }
-
-            _context.Entry(vehicle).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!VehicleExists(id))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
-            return NoContent();
-        }
+        }        
 
         // POST: api/Vehicles
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
+        [Authorize(Roles = "admin")]
         [Consumes("application/x-www-form-urlencoded")]
         public async Task<ActionResult<Vehicle>> PostVehicle([FromForm] VehicleDTO createVehicleDTO)
         {
+            string? username = User.FindFirstValue(ClaimTypes.Name);
+            if (username == null)
+            {
+                return Unauthorized("Unauthorized access, username not found in token");
+            }
+            var user = await _context.User.SingleOrDefaultAsync(u => u.username == username);
+            if (user == null)
+            {
+                return NotFound("User not found");
+            }
             var vehicle = new Vehicle
             {
                 type = createVehicleDTO.type,
@@ -123,23 +104,7 @@ namespace PemesananKendaraan.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetVehicle", new { id = vehicle.vehicle_id }, vehicle);
-        }
-
-        // DELETE: api/Vehicles/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteVehicle(int id)
-        {
-            var vehicle = await _context.Vehicle.FindAsync(id);
-            if (vehicle == null)
-            {
-                return NotFound();
-            }
-
-            _context.Vehicle.Remove(vehicle);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
-        }
+        }        
 
         private bool VehicleExists(int id)
         {

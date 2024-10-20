@@ -136,19 +136,9 @@ namespace PemesananKendaraan.Controllers
             return Ok(approvalResponseDTO);
         }
 
-        // POST: api/Approvals
-        // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
-        [HttpPost]
-        public async Task<ActionResult<Approval>> PostApproval(Approval approval)
-        {
-            _context.Approval.Add(approval);
-            await _context.SaveChangesAsync();
-
-            return CreatedAtAction("GetApproval", new { id = approval.approval_id }, approval);
-        }
-
         // DELETE: api/Approvals/5
         [HttpDelete("{id}")]
+        [Authorize(Roles = "approver")]
         public async Task<IActionResult> DeleteApproval(int id)
         {
             var approval = await _context.Approval.FindAsync(id);
